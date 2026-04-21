@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HireMatch — The Hiring Challenge</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;width:100%;background:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1C1C1C;overflow:hidden}
+#root{display:flex;flex-direction:column;height:100vh;width:100vw}
+.topbar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:58px;border-bottom:1px solid #EAEAEB;background:#fff;position:relative}
+.topbar-logo{display:flex;align-items:center}
+.step-bar{display:flex;align-items:center;position:absolute;left:50%;transform:translateX(-50%)}
+.sdot{width:10px;height:10px;border-radius:50%;background:#DBDBDC;transition:background .3s}
+.sdot.on{background:#0E73FB}
+.sline{width:38px;height:2px;background:#EAEAEB}
+.nav-btns{display:flex;gap:10px;min-width:260px;justify-content:flex-end;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 24px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:opacity .17s,transform .12s;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.bp{background:#0E73FB;color:#fff}.bp:hover{opacity:.88}.bp:disabled{opacity:.4;cursor:default}
+.bg{background:#F1F7FF;color:#0E73FB;border:1px solid #B7D5FE}.bg:hover{background:#E4F0FF}
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column;align-items:center;padding:1.5vh 2vw 1vh;background:#fff}
+.stage{display:none;flex-direction:column;align-items:center;width:100%;height:100%;animation:fup .4s ease both}
+.stage.active{display:flex}
+@keyframes fup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.eyebrow{font-size:clamp(10px,.9vw,12px);letter-spacing:.12em;text-transform:uppercase;color:#B7B7B7;margin-bottom:.25rem;text-align:center}
+.htitle{font-size:clamp(22px,2.4vw,34px);font-weight:700;color:#1C1C1C;text-align:center;margin-bottom:.2rem;line-height:1.2}
+.hsub{font-size:clamp(13px,1.2vw,16px);color:#8D8D8D;text-align:center;margin-bottom:.8vh;max-width:580px;line-height:1.5}
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:.7vh}
+.li{display:flex;align-items:center;gap:6px;font-size:clamp(11px,1vw,13px);color:#8D8D8D}
+.ld{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.arena-wrap{position:relative;width:100%;flex:1;min-height:0}
+.arena{position:absolute;inset:0;border-radius:14px;border:1px solid #EAEAEB;background:#F9F9FA;overflow:hidden}
+.arena-cta{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:20;transition:opacity .4s;background:#F9F9FA;border-radius:14px}
+.arena-cta.hidden{opacity:0;pointer-events:none}
+.arena-cta-icon{width:52px;height:52px;border-radius:50%;background:#F1F7FF;display:flex;align-items:center;justify-content:center}
+.arena-cta p{font-size:13px;color:#8D8D8D;text-align:center;max-width:200px;line-height:1.5}
+.cv{position:absolute;background:#fff;border:1px solid #EAEAEB;border-radius:10px;padding:8px 10px;font-size:clamp(8px,.72vw,10px);color:#8D8D8D;opacity:0;transition:opacity .35s,top .6s cubic-bezier(.2,1.1,.5,1)}
+.cv.show{opacity:1}
+.cv-head{display:flex;align-items:center;gap:6px;margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid #F4F4F4}
+.av{width:clamp(18px,1.7vw,24px);height:clamp(18px,1.7vw,24px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(7px,.65vw,9px);font-weight:700;flex-shrink:0}
+.cvn{font-size:clamp(9px,.85vw,11.5px);font-weight:700;color:#1C1C1C;line-height:1.2}
+.cvt{font-size:clamp(7px,.62vw,9px);color:#DBDBDC}
+.csec{font-size:clamp(7.5px,.65vw,9px);font-weight:700;color:#DBDBDC;letter-spacing:.07em;text-transform:uppercase;margin:3px 0 2px}
+.cr{margin-bottom:2px}
+.crt{font-size:clamp(8px,.75vw,10px);font-weight:700;color:#3D3D3D}
+.crc{font-size:clamp(7.5px,.68vw,9.5px);color:#8D8D8D}
+.crd{font-size:clamp(7px,.6vw,8.5px);color:#DBDBDC}
+.cdesc{font-size:clamp(7.5px,.65vw,9px);color:#8D8D8D;line-height:1.35;margin-top:1px}
+.hb{background:#F1F7FF;color:#0A5AC5;border-radius:2px;padding:0 2px}
+.hg{background:#EAF3DE;color:#27500A;border-radius:2px;padding:0 2px}
+.ha{background:#FAEEDA;color:#633806;border-radius:2px;padding:0 2px}
+.hr{background:#FFF7F4;color:#F31137;border-radius:2px;padding:0 2px}
+.skrow{display:flex;flex-wrap:wrap;gap:2px;margin-top:2px}
+.sk{font-size:clamp(7px,.6vw,8.5px);padding:1px 4px;border-radius:8px;background:#F9F9FA;color:#8D8D8D;border:1px solid #EAEAEB;white-space:nowrap}
+.sk.m{background:#F1F7FF;color:#0A5AC5;border-color:#B7D5FE}
+.edurow{font-size:clamp(7.5px,.65vw,9px);color:#8D8D8D}
+.cbar{display:flex;gap:clamp(16px,3vw,52px);justify-content:center;margin-top:.5vh;margin-bottom:.5vh;opacity:0;transition:opacity .6s}
+.cbar.show{opacity:1}
+.cn2{font-size:clamp(24px,2.8vw,42px);font-weight:700;color:#0E73FB;line-height:1;text-align:center}
+.cl{font-size:clamp(11px,.95vw,13px);color:#8D8D8D;text-align:center;margin-top:3px}
+.ats-outer{width:100%;flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.ats-shell{width:100%;flex:1;min-height:0;border-radius:12px;border:1px solid #EAEAEB;overflow:hidden;display:flex;flex-direction:column;background:#fff}
+.chrome{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:10px 16px;background:#F9F9FA;border-bottom:1px solid #EAEAEB}
+.cd{width:10px;height:10px;border-radius:50%}
+.clbl{font-size:clamp(11px,1vw,13.5px);color:#8D8D8D;margin-left:6px;font-weight:500}
+.tbl-scroll{flex:1;overflow-y:auto;background:#fff}
+table{border-collapse:collapse;width:100%;table-layout:fixed}
+th{font-size:clamp(10px,.9vw,12.5px);font-weight:600;color:#8D8D8D;padding:9px 12px;text-align:left;background:#F9F9FA;border-bottom:1px solid #EAEAEB;white-space:nowrap;position:sticky;top:0}
+td{font-size:clamp(11px,1vw,13px);padding:8px 12px;border-bottom:1px solid #F4F4F4;color:#1C1C1C;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tbody tr{opacity:0;transform:translateX(-5px);transition:opacity .2s,transform .2s}
+tbody tr.show{opacity:1;transform:none}
+.pill{display:inline-block;font-size:clamp(10px,.85vw,12px);padding:2px 9px;border-radius:12px;white-space:nowrap;font-weight:600}
+.pb{background:#F1F7FF;color:#0A5AC5}
+.pg{background:#BAE2BA;color:#007500}
+.pa{background:#F7E8A3;color:#854F0B}
+.pr{background:#F8D8DE;color:#AE0925}
+.banner{flex-shrink:0;width:100%;margin-top:.8vh;padding:12px 18px;border-radius:10px;border:1px solid #F8D8DE;background:#FFF7F4;opacity:0;transition:opacity .5s}
+.banner.show{opacity:1}
+.banner p{font-size:clamp(15px,1.4vw,19px);color:#AE0925;line-height:1.6}
+.banner strong{color:#7A0018;font-weight:700}
+
+/* S3 */
+.s3-body{width:100%;flex:1;min-height:0;display:flex;flex-direction:column}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,1.5vw,22px);width:100%}
+.cand-card{background:#fff;border:1px solid #EAEAEB;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 16px rgba(0,0,0,0.08)}
+.cand-card.ats-pass{border:2px solid #007500;box-shadow:0 4px 16px rgba(0,117,0,.15)}
+.cand-card.ats-risk{border:2px solid #DBDBDC;box-shadow:0 4px 16px rgba(0,0,0,0.06)}
+.card-header{flex-shrink:0;padding:12px clamp(14px,1.6vw,22px);border-bottom:1px solid #F4F4F4;display:flex;align-items:center;gap:12px}
+.card-av{width:clamp(32px,3vw,44px);height:clamp(32px,3vw,44px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(12px,1.1vw,15px);font-weight:700;flex-shrink:0}
+.card-name{font-size:clamp(20px,2vw,28px);font-weight:700;color:#1C1C1C}
+.card-role{font-size:clamp(15px,1.35vw,18px);color:#8D8D8D;margin-top:2px}
+.card-tag{display:inline-block;font-size:clamp(13px,1.1vw,15px);padding:3px 12px;border-radius:20px;margin-top:3px;font-weight:600}
+.card-body{padding:12px clamp(14px,1.6vw,22px);flex:1;display:flex;flex-direction:column}
+.score-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.score-label{font-size:clamp(15px,1.4vw,19px);color:#8D8D8D}
+.score-num{font-size:clamp(32px,3.5vw,48px);font-weight:700}
+.score-bar-wrap{height:10px;border-radius:5px;background:#F4F4F4;overflow:hidden;margin-bottom:14px}
+.score-bar{height:100%;border-radius:4px;width:0;transition:width 1.1s cubic-bezier(.4,0,.2,1)}
+.field-row{display:flex;flex-direction:column;gap:clamp(6px,.7vh,10px)}
+.field{display:flex;justify-content:space-between;align-items:flex-start;font-size:clamp(16px,1.5vw,22px);gap:12px}
+.field-key{color:#8D8D8D;flex-shrink:0;font-size:clamp(15px,1.4vw,20px)}
+.field-val{font-size:clamp(15px,1.4vw,20px);font-weight:600;text-align:right;line-height:1.35}
+.ai-badge{display:inline-flex;align-items:center;gap:5px;font-size:clamp(14px,1.2vw,17px);padding:4px 12px;border-radius:20px;background:#FFF7F4;color:#F31137;border:1px solid #F8D8DE;margin-top:6px;width:fit-content;font-weight:600}
+.truth-tag{font-size:clamp(14px,1.2vw,17px);padding:4px 12px;border-radius:20px;display:inline-block;margin-top:5px;font-weight:600;width:fit-content}
+.score-badge{display:inline-flex;align-items:center;justify-content:center;width:clamp(38px,3.5vw,50px);height:clamp(38px,3.5vw,50px);border-radius:50%;font-size:clamp(14px,1.4vw,19px);font-weight:700;border:3px solid;flex-shrink:0}
+.confusion-banner{flex-shrink:0;width:100%;margin-top:clamp(7px,.9vh,13px);padding:clamp(10px,1.1vh,14px) clamp(14px,1.4vw,20px);border-radius:10px;background:#FFF7F4;border:1px solid #F8D8DE;opacity:0;transition:opacity .6s}
+.confusion-banner.show{opacity:1}
+.confusion-banner p{font-size:clamp(15px,1.4vw,19px);color:#AE0925;line-height:1.65}
+.confusion-banner strong{color:#7A0018;font-weight:700}
+
+/* S4 */
+.algo-wrap{display:grid;grid-template-columns:1fr 40px 1fr;gap:clamp(10px,1.5vw,22px);width:100%;flex:1;min-height:0;align-items:start;margin-top:.5vh}
+.algo-side{display:flex;flex-direction:column;gap:7px}
+.algo-header{text-align:center;padding:12px 16px;border-radius:10px;font-size:clamp(16px,1.5vw,20px);font-weight:700;margin-bottom:4px}
+.algo-header.left{background:#F4F4F4;color:#8D8D8D}
+.algo-header.right{background:#0E73FB;color:#fff}
+.arow{display:flex;align-items:flex-start;gap:10px;padding:9px 13px;border-radius:10px;border:1px solid #EAEAEB;background:#fff;opacity:0;transform:translateY(5px);transition:opacity .4s,transform .4s}
+.arow.show{opacity:1;transform:none}
+.x-icon{width:22px;height:22px;border-radius:50%;background:#F8D8DE;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.check-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.arow-title{font-size:clamp(16px,1.5vw,20px);font-weight:600;color:#1C1C1C;line-height:1.3}
+.arow-sub{font-size:clamp(14px,1.3vw,17px);color:#8D8D8D;margin-top:2px;line-height:1.35}
+.atag{display:inline-block;font-size:clamp(13px,1.1vw,15px);padding:3px 10px;border-radius:10px;font-weight:600;margin-top:4px}
+.kw-text{font-size:clamp(16px,1.5vw,20px);color:#8D8D8D;line-height:1.45}
+.kw-hl{background:#F8D8DE;color:#AE0925;border-radius:3px;padding:0 3px;font-weight:600}
+.algo-divider{display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:46px}
+.algo-div-line{width:1px;flex:1;background:#EAEAEB;min-height:20px}
+.algo-div-label{font-size:clamp(10px,.85vw,12px);font-weight:700;color:#DBDBDC;writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:.1em;text-transform:uppercase;padding:6px 0}
+.algo-scores{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,1.5vw,22px);margin-top:1.2vh;opacity:0;transition:opacity .5s}
+.algo-scores.show{opacity:1}
+.asc-card{border-radius:14px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border:1px solid #EAEAEB;box-shadow:0 4px 16px rgba(0,0,0,0.07)}
+.asc-card.hirematch-good{background:#F1F7FF;border-color:#B7D5FE;box-shadow:0 4px 16px rgba(14,115,251,.08)}
+.asc-card.hirematch-bad{background:#F9F9FA;border-color:#DBDBDC;}
+.asc-name{font-size:clamp(17px,1.6vw,22px);font-weight:700;color:#1C1C1C}
+.asc-role{font-size:clamp(14px,1.2vw,16px);color:#8D8D8D;margin-top:1px}
+.asc-tag{font-size:clamp(13px,1.1vw,15px);padding:3px 10px;border-radius:10px;font-weight:600;display:inline-block;margin-top:3px}
+.asc-num{font-size:clamp(32px,3.5vw,48px);font-weight:800;line-height:1}
+.asc-bar-wrap{width:clamp(80px,10vw,140px);height:8px;border-radius:3px;background:#F4F4F4;overflow:hidden;margin-top:6px}
+.asc-bar{height:100%;border-radius:3px;width:0;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+
+/* PAYOFF — full screen, white bg, blue text */
+.payoff-overlay{position:absolute;inset:0;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;padding:3rem;opacity:0;pointer-events:none;transition:opacity .7s;z-index:50}
+.payoff-overlay.show{opacity:1;pointer-events:auto}
+.payoff-logo{margin-bottom:.5rem}
+.payoff-main{font-size:clamp(30px,4.5vw,60px);font-weight:800;color:#0E73FB;text-align:center;line-height:1.15;max-width:800px}
+.payoff-sub{font-size:clamp(18px,1.8vw,26px);color:#185FA5;text-align:center;max-width:600px;line-height:1.5;font-weight:500}
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="topbar">
+    <div class="topbar-logo" id="topbar-logo" style="visibility:hidden">
+      <svg width="130" height="40" viewBox="0 0 130 40" fill="none">
+        <rect x="7" y="10" width="22" height="22" rx="3" transform="rotate(45 18 21)" stroke="#0E73FB" stroke-width="2.5" fill="none"/>
+        <rect x="12" y="15" width="12" height="12" rx="1.5" transform="rotate(45 18 21)" fill="#0E73FB"/>
+        <text x="52" y="17" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="15" font-weight="800" fill="#1C1C1C">Hire</text>
+        <text x="52" y="35" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="15" font-weight="800" fill="#1C1C1C">Match</text>
+      </svg>
+    </div>
+    <div class="step-bar">
+      <div class="sdot on" id="d0"></div><div class="sline"></div>
+      <div class="sdot" id="d1"></div><div class="sline"></div>
+      <div class="sdot" id="d2"></div><div class="sline"></div>
+      <div class="sdot" id="d3"></div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn bg" id="btn-back" style="display:none">← Back</button>
+      <button class="btn bp" id="btn-main" style="display:none">Next</button>
+    </div>
+  </div>
+
+  <div class="main" style="position:relative">
+
+    <!-- S1 -->
+    <div class="stage active" id="s1">
+      <div class="eyebrow">The reality today</div>
+      <div class="htitle">30 applicants. Hundreds of signals to interpret.</div>
+      <div class="hsub">Each CV carries roles, tech stacks, company caliber, and seniority cues — all unstructured, all requiring human judgment.</div>
+      <div class="cbar" id="cbar">
+        <div><div class="cn2" id="c1">0</div><div class="cl">applicants</div></div>
+        <div><div class="cn2" id="c2">0</div><div class="cl">data points</div></div>
+        <div><div class="cn2" id="c3">0</div><div class="cl">est. review hours</div></div>
+      </div>
+      <div class="arena-wrap">
+        <div class="arena" id="arena">
+          <div class="arena-cta" id="arena-cta">
+            <div class="arena-cta-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0E73FB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <button class="btn bp" id="btn-drop-center" style="font-size:15px;padding:12px 32px">Show the volume</button>
+            <p>30 software engineering applicants waiting</p>
+          </div>
+        </div>
+      </div>
+      <div class="legend" style="margin-top:.7vh;margin-bottom:0">
+        <div class="li"><div class="ld" style="background:#F1F7FF;border:1px solid #B7D5FE"></div>Role / tech match</div>
+        <div class="li"><div class="ld" style="background:#EAF3DE;border:1px solid #C0DD97"></div>Education signal</div>
+        <div class="li"><div class="ld" style="background:#FAEEDA;border:1px solid #FAC775"></div>Seniority / years</div>
+        <div class="li"><div class="ld" style="background:#F8D8DE;border:1px solid #EBA7B3"></div>Gap / mismatch</div>
+      </div>
+    </div>
+
+    <!-- S2 -->
+    <div class="stage" id="s2">
+      <div class="eyebrow">Organized — still overwhelming</div>
+      <div class="htitle">An ATS structures data. It doesn't reduce it.</div>
+      <div class="hsub">Every row still demands judgment: stack depth, company caliber, role progression, seniority signal.</div>
+      <div class="ats-outer">
+        <div class="ats-shell">
+          <div class="chrome">
+            <div class="cd" style="background:#F31137"></div>
+            <div class="cd" style="background:#D8A208"></div>
+            <div class="cd" style="background:#007500"></div>
+            <span class="clbl">HireMatch — Software Engineer · 30 applicants</span>
+          </div>
+          <div class="tbl-scroll">
+            <table><thead><tr>
+              <th style="width:13%">Candidate</th><th style="width:20%">Current role</th>
+              <th style="width:13%">Stack</th><th style="width:19%">Education</th>
+              <th style="width:7%;text-align:center">Yrs</th>
+              <th style="width:15%;text-align:center">Progression</th>
+              <th style="width:13%;text-align:center">Signal</th>
+            </tr></thead>
+            <tbody id="atsbody"></tbody></table>
+          </div>
+        </div>
+        <div class="banner" id="b2"><p><strong>30 rows · 12+ fields each · 360+ data points.</strong> Every cell demands interpretation — not just what someone did, but how relevant and how deep it actually was.</p></div>
+      </div>
+    </div>
+
+    <!-- S3 — James GREY (risk), Kyle GREEN (passed ATS) -->
+    <div class="stage" id="s3">
+      <div class="eyebrow">The new problem</div>
+      <div class="htitle">AI-optimized CVs — higher scores, lower quality.</div>
+      <div class="hsub">CV optimizer tools coach candidates to mirror job descriptions. Scores jump artificially. Real quality doesn't follow.</div>
+      <div class="s3-body">
+        <div class="compare-grid">
+          <!-- James — grey, at risk -->
+          <div class="cand-card ats-risk">
+            <div class="card-header">
+              <div class="score-badge" style="color:#5F5E5A;border-color:#B4B2A9;background:#F1EFE8" id="badge-real">0</div>
+              <div class="card-av" style="background:#F1EFE8;color:#5F5E5A">JM</div>
+              <div>
+                <div class="card-name">James Mitchell</div>
+                <div class="card-role">Senior SWE · Stripe · 7 yrs</div>
+                <span class="card-tag" style="background:#F1EFE8;color:#5F5E5A">At risk of being filtered out</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="score-row"><span class="score-label">ATS match score</span><span class="score-num" id="sc-real" style="color:#5F5E5A">0%</span></div>
+              <div class="score-bar-wrap"><div class="score-bar" id="bar-real" style="background:#888780"></div></div>
+              <div class="field-row">
+                <div class="field"><span class="field-key">Tech stack</span><span class="field-val" style="color:#444441">Python, Go, Kafka — 5+ yrs hands-on</span></div>
+                <div class="field"><span class="field-key">Company</span><span class="field-val" style="color:#444441">Stripe — tier-1 fintech at scale</span></div>
+                <div class="field"><span class="field-key">Progression</span><span class="field-val" style="color:#444441">Junior → Senior → Lead</span></div>
+                <div class="field"><span class="field-key">Depth</span><span class="field-val" style="color:#444441">Owned infra, led team of 6</span></div>
+              </div>
+              <span class="truth-tag" style="background:#F1EFE8;color:#5F5E5A">Genuinely strong candidate</span>
+            </div>
+          </div>
+          <!-- Kyle — green, passed ATS -->
+          <div class="cand-card ats-pass">
+            <div class="card-header">
+              <div class="score-badge" style="color:#3B6D11;border-color:#C0DD97;background:#EAF3DE" id="badge-fake">0</div>
+              <div class="card-av" style="background:#EAF3DE;color:#3B6D11">KR</div>
+              <div>
+                <div class="card-name">Kyle Rhodes</div>
+                <div class="card-role">Software Dev · Digital Agency · 3 yrs</div>
+                <span class="card-tag" style="background:#EAF3DE;color:#3B6D11">Passed ATS screening</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="score-row"><span class="score-label">ATS match score</span><span class="score-num" id="sc-fake" style="color:#3B6D11">0%</span></div>
+              <div class="score-bar-wrap"><div class="score-bar" id="bar-fake" style="background:#639922"></div></div>
+              <div class="field-row">
+                <div class="field"><span class="field-key">Tech stack</span><span class="field-val" style="color:#F31137">PHP/JS — CV claims "Python, Go, Kafka"</span></div>
+                <div class="field"><span class="field-key">Company</span><span class="field-val" style="color:#F31137">Small agency, short-cycle client work</span></div>
+                <div class="field"><span class="field-key">Progression</span><span class="field-val" style="color:#F31137">Same title 3 years, no growth</span></div>
+                <div class="field"><span class="field-key">Depth</span><span class="field-val" style="color:#F31137">No ownership, no scale experience</span></div>
+              </div>
+              <span class="ai-badge">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#F31137" stroke-width="1.5"/><path d="M8 5v4M8 11v1" stroke="#F31137" stroke-width="1.5" stroke-linecap="round"/></svg>
+                CV rewritten with AI optimizer tool
+              </span>
+              <span class="truth-tag" style="background:#F8D8DE;color:#AE0925;display:block;margin-top:5px">Looks stronger on paper — isn't</span>
+            </div>
+          </div>
+        </div>
+        <div class="confusion-banner" id="confbanner">
+          <p><strong>James scores 84% — Kyle scores 94%.</strong> The AI-optimized CV outranks the genuine candidate. Without deeper assessment, Kyle moves forward and James gets filtered out. <strong>So what's the answer?</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- S4 — Algorithm + HireMatch scores (James GREEN, Kyle GREY) -->
+    <div class="stage" id="s4">
+      <div class="eyebrow" style="font-size:clamp(14px,1.4vw,18px);color:#0E73FB;font-weight:700;letter-spacing:.04em">Why our algorithm is different</div>
+      <div class="htitle" style="font-size:clamp(26px,3vw,42px)">Keyword matching vs. predicting success</div>
+      <div class="hsub">Most tools look for the right words. We look for the right patterns.</div>
+      <div class="algo-wrap">
+        <div class="algo-side">
+          <div class="algo-header left">Keyword matching</div>
+          <div class="arow" id="kw1"><div class="x-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="#AE0925" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="kw-text">Scans for <span class="kw-hl">Python</span>, <span class="kw-hl">Kafka</span>, <span class="kw-hl">AWS</span> — words on a page, nothing more</div></div>
+          <div class="arow" id="kw2"><div class="x-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="#AE0925" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="kw-text">Can't tell if experience is deep or just listed</div></div>
+          <div class="arow" id="kw3"><div class="x-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="#AE0925" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="kw-text">Can't distinguish a tier-1 company from a small agency</div></div>
+          <div class="arow" id="kw4"><div class="x-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="#AE0925" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="kw-text">Easily gamed by AI-optimized CVs</div></div>
+        </div>
+        <div class="algo-divider">
+          <div class="algo-div-line"></div>
+          <div class="algo-div-label">vs</div>
+          <div class="algo-div-line"></div>
+        </div>
+        <div class="algo-side">
+          <div class="algo-header right">HireMatch scoring</div>
+          <div class="arow" id="sig1"><div class="check-icon" style="background:#EAF3DE"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 12L6 7l3 3 5-6" stroke="#27500A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div style="flex:1"><div class="arow-title">Career progression</div><div class="arow-sub">Trajectory, consistency, and growth over time</div></div><span class="atag" style="background:#EAF3DE;color:#27500A;white-space:nowrap;align-self:center">Pattern signal</span></div>
+          <div class="arow" id="sig2"><div class="check-icon" style="background:#F1F7FF"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="5" width="12" height="8" rx="2" stroke="#0A5AC5" stroke-width="1.5"/><path d="M5 5V4a3 3 0 016 0v1" stroke="#0A5AC5" stroke-width="1.5"/></svg></div><div style="flex:1"><div class="arow-title">Company caliber</div><div class="arow-sub">Scale, industry, and environment quality</div></div><span class="atag" style="background:#F1F7FF;color:#0A5AC5;white-space:nowrap;align-self:center">Context signal</span></div>
+          <div class="arow" id="sig3"><div class="check-icon" style="background:#FAEEDA"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="#854F0B" stroke-width="1.5"/><path d="M8 5.5v2.5l1.5 1.5" stroke="#854F0B" stroke-width="1.5" stroke-linecap="round"/></svg></div><div style="flex:1"><div class="arow-title">Depth of experience</div><div class="arow-sub">Ownership, real contribution, and impact</div></div><span class="atag" style="background:#FAEEDA;color:#854F0B;white-space:nowrap;align-self:center">Quality signal</span></div>
+          <div class="arow" id="sig4"><div class="check-icon" style="background:#EEEDFE"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.2 3.6H13l-3 2.2 1.1 3.6L8 9.2l-3.1 2.2L6 7.8 3 5.6h3.8z" stroke="#3C3489" stroke-width="1.3" stroke-linejoin="round"/></svg></div><div style="flex:1"><div class="arow-title">30 years of assessment data</div><div class="arow-sub">Proven predictive research by psychologists</div></div><span class="atag" style="background:#EEEDFE;color:#3C3489;white-space:nowrap;align-self:center">Research signal</span></div>
+        </div>
+      </div>
+
+      <!-- Logo between algo rows and score cards -->
+      <div id="score-logo" style="display:none;align-items:center;justify-content:center;margin:.2vh 0">
+        <svg width="100" height="32" viewBox="0 0 130 40" fill="none">
+          <rect x="7" y="10" width="22" height="22" rx="3" transform="rotate(45 18 21)" stroke="#0E73FB" stroke-width="2.5" fill="none"/>
+          <rect x="12" y="15" width="12" height="12" rx="1.5" transform="rotate(45 18 21)" fill="#0E73FB"/>
+          <text x="52" y="17" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="15" font-weight="800" fill="#1C1C1C">Hire</text>
+          <text x="52" y="35" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="15" font-weight="800" fill="#1C1C1C">Match</text>
+        </svg>
+      </div>
+
+      <!-- HireMatch score reveal — hidden until click -->
+      <div class="algo-scores" id="algo-scores" style="opacity:0;pointer-events:none;transition:opacity .5s">
+        <!-- Kyle — grey, demoted -->
+        <div class="asc-card hirematch-bad">
+          <div>
+            <div style="font-size:clamp(12px,.95vw,14px);color:#8D8D8D;margin-bottom:2px">Before → After HireMatch</div>
+            <div class="asc-name">Kyle Rhodes</div>
+            <div class="asc-role">Agency · AI-optimized CV</div>
+            <span class="asc-tag" style="background:#F1EFE8;color:#5F5E5A">Correctly filtered down</span>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:clamp(11px,.9vw,13px);color:#8D8D8D;margin-bottom:2px">keyword → HireMatch</div>
+            <div style="display:flex;align-items:baseline;gap:8px;justify-content:flex-end">
+              <div style="font-size:clamp(18px,1.8vw,26px);font-weight:700;color:#B4B2A9;text-decoration:line-through">94%</div>
+              <div style="font-size:clamp(18px,1.8vw,26px);color:#DBDBDC">→</div>
+              <div class="asc-num" id="asc-bad" style="color:#F31137">0%</div>
+            </div>
+            <div class="asc-bar-wrap"><div class="asc-bar" id="abar-bad" style="background:#F31137"></div></div>
+          </div>
+        </div>
+        <!-- James — blue, promoted -->
+        <div class="asc-card hirematch-good">
+          <div>
+            <div style="font-size:clamp(12px,.95vw,14px);color:#8D8D8D;margin-bottom:2px">Before → After HireMatch</div>
+            <div class="asc-name">James Mitchell</div>
+            <div class="asc-role">Stripe · 7 yrs · genuine depth</div>
+            <span class="asc-tag" style="background:#BAE2BA;color:#27500A">Correctly identified — top candidate</span>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:clamp(11px,.9vw,13px);color:#8D8D8D;margin-bottom:2px">keyword → HireMatch</div>
+            <div style="display:flex;align-items:baseline;gap:8px;justify-content:flex-end">
+              <div style="font-size:clamp(18px,1.8vw,26px);font-weight:700;color:#B4B2A9;text-decoration:line-through">84%</div>
+              <div style="font-size:clamp(18px,1.8vw,26px);color:#DBDBDC">→</div>
+              <div class="asc-num" id="asc-good" style="color:#007500">0%</div>
+            </div>
+            <div class="asc-bar-wrap"><div class="asc-bar" id="abar-good" style="background:#007500"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="payoff-overlay" id="payoff">
+        <div class="payoff-logo">
+          <svg width="180" height="54" viewBox="0 0 180 54" fill="none">
+            <rect x="7" y="10" width="26" height="26" rx="3.5" transform="rotate(45 20 23)" stroke="#0E73FB" stroke-width="3" fill="none"/>
+            <rect x="13" y="16" width="14" height="14" rx="2" transform="rotate(45 20 23)" fill="#0E73FB"/>
+            <text x="58" y="22" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="18" font-weight="800" fill="#1C1C1C">Hire</text>
+            <text x="58" y="44" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="18" font-weight="800" fill="#1C1C1C">Match</text>
+          </svg>
+        </div>
+        <div class="payoff-main">Success isn't a feeling —<br>it's a pattern.</div>
+        <div class="payoff-sub">And patterns can be measured.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const stageLabels=['CV volume','ATS view','AI score inflation','Why we\'re different'];
+const stageBtns=[null,'Even in an ATS →','And it gets worse →',null];
+let cur=0,dropped=false,s2done=false,s3done=false,s4phase=0;
+
+const cvData=[
+  {init:'JM',name:'James Mitchell',color:'#F1F7FF',tc:'#0A5AC5',title:'Senior SWE',r1t:'Senior SWE',r1c:'Stripe',r1d:'2020–now',r1d2:'<span class="hb">Payments API dev</span> at scale. <span class="ha">7 yrs</span>.',r2t:'SWE',r2c:'Revolut',r2d:'2017–20',r2d2:'<span class="hb">Python/Go microservices</span>.',skills:['Python','Go','Kafka','AWS'],edu:'<span class="hg">MSc CS — Imperial</span>'},
+  {init:'SP',name:'Sara Petrov',color:'#EAF3DE',tc:'#27500A',title:'Full Stack Dev',r1t:'Full Stack',r1c:'Monzo',r1d:'2021–now',r1d2:'<span class="hb">React + Node.js</span> banking. <span class="ha">4 yrs</span>.',r2t:'Junior Dev',r2c:'Startup XYZ',r2d:'2019–21',r2d2:'<span class="hr">Early stage</span>, limited depth.',skills:['React','Node','TS','SQL'],edu:'<span class="hg">BSc SE — UCL</span>'},
+  {init:'AK',name:'Arjun Kumar',color:'#FAEEDA',tc:'#633806',title:'Backend Eng',r1t:'Backend Eng',r1c:'Amazon',r1d:'2018–now',r1d2:'<span class="hb">Distributed systems</span> AWS. <span class="ha">6 yrs</span>.',r2t:'Intern',r2c:'TCS',r2d:'2017–18',r2d2:'Enterprise Java internship.',skills:['Java','AWS','DynamoDB','Docker'],edu:'<span class="hg">BTech CS — IIT Bombay</span>'},
+  {init:'LC',name:'Léa Caron',color:'#EEEDFE',tc:'#3C3489',title:'SWE',r1t:'SWE',r1c:'Datadog',r1d:'2022–now',r1d2:'<span class="hb">Observability tooling Go</span>. <span class="ha">3 yrs</span>.',r2t:'Bootcamp',r2c:'Le Wagon',r2d:'2021',r2d2:'<span class="hr">Non-traditional entry</span>.',skills:['Go','K8s','Prometheus','Py'],edu:'<span class="ha">Bootcamp + BSc Physics</span>'},
+  {init:'TN',name:'Tom Nguyen',color:'#F1F7FF',tc:'#0A5AC5',title:'Principal Eng',r1t:'Principal Eng',r1c:'Shopify',r1d:'2019–now',r1d2:'<span class="hb">Platform architecture</span>, leads 8. <span class="ha">9 yrs</span>.',r2t:'Staff Eng',r2c:'Zendesk',r2d:'2015–19',r2d2:'<span class="hb">Core infra, Ruby/Kafka</span>.',skills:['Ruby','Rails','Kafka','Redis'],edu:'<span class="hg">MSc CS — Waterloo</span>'},
+  {init:'MO',name:'Mark Owen',color:'#FFF7F4',tc:'#F31137',title:'Software Dev',r1t:'Software Dev',r1c:'Agency Co.',r1d:'2020–now',r1d2:'<span class="hr">Agency work</span>, short cycles. <span class="ha">4 yrs</span>.',r2t:'Junior Dev',r2c:'Freelance',r2d:'2018–20',r2d2:'<span class="hr">Freelance only</span>, no team.',skills:['PHP','WordPress','MySQL','JS'],edu:'<span class="ha">BSc IT — Leeds Met</span>'},
+  {init:'RB',name:'Romain Blanc',color:'#EAF3DE',tc:'#27500A',title:'Backend Eng',r1t:'Backend Eng',r1c:'BlaBlaCar',r1d:'2021–now',r1d2:'<span class="hb">Python microservices</span>, 20M users. <span class="ha">5 yrs</span>.',r2t:'Dev',r2c:'Criteo',r2d:'2019–21',r2d2:'<span class="hb">Ad-tech Spark pipelines</span>.',skills:['Python','Spark','PG','Docker'],edu:'<span class="hg">MSc Data Eng — Polytechnique</span>'},
+  {init:'EW',name:'Eva Walsh',color:'#FAEEDA',tc:'#633806',title:'Frontend Eng',r1t:'Frontend Eng',r1c:'Intercom',r1d:'2020–now',r1d2:'<span class="hb">React design systems</span>. <span class="ha">5 yrs</span>.',r2t:'UI Dev',r2c:'Agency',r2d:'2018–20',r2d2:'<span class="hr">Frontend only</span>, no backend.',skills:['React','TS','CSS','Figma'],edu:'<span class="hg">BSc CS — Dublin City</span>'},
+  {init:'DL',name:'Daniel Lee',color:'#F1F7FF',tc:'#0A5AC5',title:'SWE',r1t:'SWE',r1c:'Meta',r1d:'2022–now',r1d2:'<span class="hb">React Native infra</span>. <span class="ha">4 yrs</span>.',r2t:'Dev',r2c:'Twitter',r2d:'2020–22',r2d2:'<span class="hb">Platform services</span>.',skills:['React','TS','GraphQL','JS'],edu:'<span class="hg">BSc CS — UCLA</span>'},
+  {init:'YB',name:'Yvonne Baxter',color:'#EAF3DE',tc:'#27500A',title:'Backend Eng',r1t:'Backend Eng',r1c:'Deliveroo',r1d:'2021–now',r1d2:'<span class="hb">Geo-routing services</span>. <span class="ha">5 yrs</span>.',r2t:'Dev',r2c:'Skyscanner',r2d:'2019–21',r2d2:'<span class="hb">API platform dev</span>.',skills:['Python','PostgreSQL','Redis','GCP'],edu:'<span class="hg">MSc CS — Edinburgh</span>'},
+  {init:'NF',name:'Nathan Fox',color:'#FFF7F4',tc:'#F31137',title:'Full Stack Dev',r1t:'Full Stack',r1c:'Agency IL',r1d:'2021–now',r1d2:'<span class="hr">Agency projects</span>. <span class="ha">3 yrs</span>.',r2t:'Junior Dev',r2c:'Freelance',r2d:'2019–21',r2d2:'<span class="hr">Freelance only</span>.',skills:['Vue','PHP','MySQL','CSS'],edu:'<span class="ha">Diploma — Online Course</span>'},
+  {init:'OR',name:'Oliver Reed',color:'#F1F7FF',tc:'#0A5AC5',title:'SWE',r1t:'SWE',r1c:'Amadeus',r1d:'2020–now',r1d2:'<span class="hb">Travel tech systems</span>. <span class="ha">5 yrs</span>.',r2t:'Dev',r2c:'Thales',r2d:'2016–19',r2d2:'<span class="hg">Defense software dev</span>.',skills:['Java','Spring','Oracle','Linux'],edu:'<span class="hg">BSc CS — Nottingham</span>'},
+  {init:'KS',name:'Kate Schmidt',color:'#EAF3DE',tc:'#27500A',title:'SWE',r1t:'SWE',r1c:'Booking.com',r1d:'2020–now',r1d2:'<span class="hb">Search & ranking</span>. <span class="ha">5 yrs</span>.',r2t:'Dev',r2c:'TomTom',r2d:'2018–20',r2d2:'<span class="hb">Maps backend</span>.',skills:['Python','Scala','Spark','SQL'],edu:'<span class="hg">BSc CS — TU Delft</span>'},
+  {init:'BM',name:'Ben Murray',color:'#FAEEDA',tc:'#633806',title:'DevOps Eng',r1t:'DevOps Eng',r1c:'Cloudflare',r1d:'2021–now',r1d2:'<span class="hb">K8s infra at scale</span>. <span class="ha">4 yrs</span>.',r2t:'SysAdmin',r2c:'Rackspace',r2d:'2019–21',r2d2:'Linux infra, networking.',skills:['K8s','Terraform','AWS','Go'],edu:'<span class="hg">BSc SE — Manchester</span>'},
+  {init:'IM',name:'Ian Morris',color:'#FFF7F4',tc:'#F31137',title:'Full Stack Dev',r1t:'Full Stack',r1c:'Funding Circle',r1d:'2022–now',r1d2:'<span class="hb">Marketplace features</span>. <span class="ha">3 yrs</span>.',r2t:'Intern',r2c:'Startup',r2d:'2021',r2d2:'<span class="hr">Short internship only</span>.',skills:['Node','React','MongoDB','Redis'],edu:'<span class="ha">BSc CS — Open Univ</span>'},
+  {init:'NH',name:'Nina Hartmann',color:'#F1F7FF',tc:'#0A5AC5',title:'Backend Eng',r1t:'Backend Eng',r1c:'Adyen',r1d:'2019–now',r1d2:'<span class="hb">Payments microservices</span>. <span class="ha">6 yrs</span>.',r2t:'Dev',r2c:'Philips',r2d:'2017–19',r2d2:'<span class="hb">Healthcare backend</span>.',skills:['Java','Spring','Kafka','Oracle'],edu:'<span class="hg">MSc CS — TU Eindhoven</span>'},
+  {init:'GT',name:'Gabriel Torres',color:'#EEEDFE',tc:'#3C3489',title:'ML Engineer',r1t:'ML Eng',r1c:'Nvidia',r1d:'2021–now',r1d2:'<span class="hb">Model infra & pipelines</span>. <span class="ha">4 yrs</span>.',r2t:'Research Dev',r2c:'Airbus',r2d:'2018–21',r2d2:'<span class="hg">Aerospace R&D</span>.',skills:['Python','PyTorch','CUDA','C++'],edu:'<span class="hg">MSc CS — ETH Zurich</span>'},
+  {init:'RL',name:'Rachel Lane',color:'#FFF7F4',tc:'#F31137',title:'Frontend Dev',r1t:'Frontend Dev',r1c:'Agency XY',r1d:'2021–now',r1d2:'<span class="hr">Client websites</span>, agency. <span class="ha">3 yrs</span>.',r2t:'Intern',r2c:'Freelance',r2d:'2020',r2d2:'<span class="hr">No product experience</span>.',skills:['HTML','CSS','JS','jQuery'],edu:'<span class="ha">Graphic Design Diploma</span>'},
+  {init:'AS',name:'Adam Stone',color:'#EAF3DE',tc:'#27500A',title:'Backend Eng',r1t:'Backend Eng',r1c:'Palo Alto Networks',r1d:'2020–now',r1d2:'<span class="hb">Security microservices</span>. <span class="ha">5 yrs</span>.',r2t:'Dev',r2c:'Cisco',r2d:'2018–20',r2d2:'<span class="hb">Enterprise networking</span>.',skills:['Java','Go','PostgreSQL','Docker'],edu:'<span class="hg">BSc CS — Georgia Tech</span>'},
+  {init:'LG',name:'Lucas Grant',color:'#FAEEDA',tc:'#633806',title:'SWE',r1t:'SWE',r1c:'Google',r1d:'2021–now',r1d2:'<span class="hb">Infra tooling & APIs</span>. <span class="ha">4 yrs</span>.',r2t:'SWE Intern',r2c:'Google',r2d:'2020',r2d2:'<span class="hg">Converted from internship</span>.',skills:['Go','C++','Python','Bazel'],edu:'<span class="hg">BSc CS — MIT</span>'},
+  {init:'MM',name:'Marie Martin',color:'#EAF3DE',tc:'#27500A',title:'Backend Eng',r1t:'Backend Eng',r1c:'Thales',r1d:'2020–now',r1d2:'<span class="hb">Security APIs</span>. <span class="ha">5 yrs</span>.',r2t:'Dev',r2c:'Safran',r2d:'2018–20',r2d2:'<span class="hg">Embedded systems</span>.',skills:['C++','Python','Linux','Docker'],edu:'<span class="hg">BSc CS — Polytechnique</span>'},
+  {init:'DP',name:'David Park',color:'#F1F7FF',tc:'#0A5AC5',title:'SWE',r1t:'SWE',r1c:'Airbnb',r1d:'2021–now',r1d2:'<span class="hb">Payments & trust</span>. <span class="ha">4 yrs</span>.',r2t:'Dev',r2c:'Lyft',r2d:'2019–21',r2d2:'<span class="hb">Ride infra backend</span>.',skills:['Java','Kotlin','gRPC','AWS'],edu:'<span class="hg">BSc CS — Stanford</span>'},
+  {init:'TM',name:'Tyler Morgan',color:'#FFF7F4',tc:'#F31137',title:'Frontend Dev',r1t:'Frontend Dev',r1c:'Web Agency',r1d:'2020–now',r1d2:'<span class="hr">Agency client sites</span>. <span class="ha">4 yrs</span>.',r2t:'Junior',r2c:'Freelance',r2d:'2018–20',r2d2:'<span class="hr">Solo freelance only</span>.',skills:['HTML','CSS','jQuery','WP'],edu:'<span class="ha">UX Diploma — Shillington</span>'},
+  {init:'RK',name:'Rosa Klein',color:'#EAF3DE',tc:'#27500A',title:'SWE',r1t:'SWE',r1c:'Spotify',r1d:'2021–now',r1d2:'<span class="hb">Audio processing infra</span>. <span class="ha">4 yrs</span>.',r2t:'Dev',r2c:'King',r2d:'2019–21',r2d2:'<span class="hb">Game backend systems</span>.',skills:['Java','Flink','Kafka','GCP'],edu:'<span class="hg">BSc CS — KTH Stockholm</span>'},
+  {init:'YS',name:'Yann Simon',color:'#FAEEDA',tc:'#633806',title:'Full Stack Dev',r1t:'Full Stack',r1c:'Doctolib',r1d:'2020–now',r1d2:'<span class="hb">Healthcare platform</span>. <span class="ha">5 yrs</span>.',r2t:'Dev',r2c:'Deezer',r2d:'2018–20',r2d2:'<span class="hb">Streaming data pipeline</span>.',skills:['Scala','Kafka','React','PG'],edu:'<span class="hg">BSc CS — Sorbonne</span>'},
+  {init:'HB',name:'Holly Brown',color:'#FFF7F4',tc:'#F31137',title:'Junior Dev',r1t:'Junior Dev',r1c:'Small Startup',r1d:'2022–now',r1d2:'<span class="hr">Early stage startup</span>. <span class="ha">2 yrs</span>.',r2t:'Bootcamp',r2c:'Bootcamp',r2d:'2022',r2d2:'<span class="hr">Bootcamp graduate only</span>.',skills:['JS','React','Node','CSS'],edu:'<span class="ha">Bootcamp — No degree</span>'},
+  {init:'EK',name:'Ethan King',color:'#F1F7FF',tc:'#0A5AC5',title:'Backend Eng',r1t:'Backend Eng',r1c:'Just Eat',r1d:'2019–now',r1d2:'<span class="hb">Recommendation engine</span>. <span class="ha">6 yrs</span>.',r2t:'Dev',r2c:'Trainline',r2d:'2017–19',r2d2:'<span class="hb">Travel booking backend</span>.',skills:['Java','Scala','Kafka','Redis'],edu:'<span class="hg">BSc CS — Bristol</span>'},
+  {init:'NL',name:'Nora Laurent',color:'#EAF3DE',tc:'#27500A',title:'SWE',r1t:'SWE',r1c:'Contentsquare',r1d:'2021–now',r1d2:'<span class="hb">Analytics platform</span>. <span class="ha">4 yrs</span>.',r2t:'Dev',r2c:'Leboncoin',r2d:'2019–21',r2d2:'<span class="hb">Marketplace backend</span>.',skills:['Python','Spark','ES','AWS'],edu:'<span class="hg">BSc CS — Paris Saclay</span>'},
+  {init:'MH',name:'Mike Harris',color:'#FFF7F4',tc:'#F31137',title:'Dev',r1t:'Dev',r1c:'IT Contractor',r1d:'2019–now',r1d2:'<span class="hr">IT contractor work</span>. <span class="ha">5 yrs</span>.',r2t:'Support Dev',r2c:'Various',r2d:'2016–19',r2d2:'<span class="hr">Support & maintenance only</span>.',skills:['PHP','SQL','VB.NET','CSS'],edu:'<span class="ha">HND Computing — Online</span>'},
+  {init:'SB',name:'Sofia Brandt',color:'#EEEDFE',tc:'#3C3489',title:'SWE',r1t:'SWE',r1c:'Zalando',r1d:'2021–now',r1d2:'<span class="hb">E-commerce infra</span>. <span class="ha">4 yrs</span>.',r2t:'Dev',r2c:'Siemens',r2d:'2019–21',r2d2:'<span class="hb">IoT data systems</span>.',skills:['Java','Flink','Kafka','MySQL'],edu:'<span class="hg">BSc SE — TU Berlin</span>'},
+  {init:'ZA',name:'Zoe Adams',color:'#FAEEDA',tc:'#633806',title:'DevOps Eng',r1t:'DevOps Eng',r1c:'Darktrace',r1d:'2020–now',r1d2:'<span class="hb">Cloud security infra</span>. <span class="ha">5 yrs</span>.',r2t:'SysOps',r2c:'ARM',r2d:'2018–20',r2d2:'<span class="hb">Network systems ops</span>.',skills:['AWS','Terraform','K8s','Python'],edu:'<span class="hg">BSc CS — Cambridge</span>'},
+];
+
+const atsRows=cvData.map(c=>({
+  name:c.name,role:`${c.r1t} · ${c.r1c}`,stack:c.skills.slice(0,2).join('/'),
+  edu:c.edu.replace(/<[^>]+>/g,''),
+  sig:['JM','AK','TN','RB','DL','YB','OR','KS','NH','GT','AS','LG','MM','DP','RK','YS','EK','NL','SB','ZA'].includes(c.init)?'strong':['MO','NF','RL','TM','HB','MH','IM'].includes(c.init)?'weak':'mid',
+  prog:c.init==='TN'?'Eng → Principal':c.init==='AK'?'Intern → Senior':['MO','NF','RL','TM','HB','MH'].includes(c.init)?'Freelance → Dev':c.init==='LC'?'Boot → Mid':'Junior → Mid'
+}));
+
+function placeCards(){
+  const a=document.getElementById('arena');
+  const W=a.offsetWidth,H=a.offsetHeight;
+  const cols=6,rows=5,cw=Math.min(999,W/cols-6),ch=H/rows;
+  return cvData.map((_,i)=>{
+    const col=i%cols,row=Math.floor(i/cols);
+    const jx=(Math.random()-.5)*4,jy=(Math.random()-.5)*3;
+    return{x:col*(W/cols)+6+jx,y:row*ch+5+jy,offY:row*ch+5+jy-80,w:cw};
+  });
+}
+
+const arena=document.getElementById('arena');
+let cvCards=[];
+function buildCards(){
+  const pos=placeCards();
+  cvData.forEach((c,i)=>{
+    const el=document.createElement('div');el.className='cv';
+    const p=pos[i];
+    el.style.cssText=`left:${p.x}px;top:${p.offY}px;z-index:${i+1};width:${p.w}px`;
+    el.innerHTML=`<div class="cv-head"><div class="av" style="background:${c.color};color:${c.tc}">${c.init}</div><div><div class="cvn">${c.name}</div><div class="cvt">${c.title}</div></div></div><div class="csec">Experience</div><div class="cr"><div class="crt">${c.r1t} <span class="crd">${c.r1d}</span></div><div class="crc">${c.r1c}</div><div class="cdesc">${c.r1d2}</div></div><div class="cr"><div class="crt">${c.r2t} <span class="crd">${c.r2d}</span></div><div class="crc">${c.r2c}</div><div class="cdesc">${c.r2d2}</div></div><div class="csec">Skills</div><div class="skrow">${c.skills.map((s,j)=>`<span class="sk${j<2?' m':''}">${s}</span>`).join('')}</div><div class="csec" style="margin-top:3px">Education</div><div class="edurow">${c.edu}</div>`;
+    arena.appendChild(el);
+    cvCards.push({el,ty:p.y});
+  });
+}
+
+function animN(id,target,dur,sfx){
+  const el=document.getElementById(id),t0=performance.now();
+  (function t(now){const p=Math.min((now-t0)/dur,1),e=1-Math.pow(1-p,3);el.textContent=Math.round(e*target)+(sfx||'');if(p<1)requestAnimationFrame(t);})(performance.now());
+}
+function animScore(nid,bid,val,dur){
+  const ne=document.getElementById(nid),be=document.getElementById(bid),t0=performance.now();
+  (function t(now){const p=Math.min((now-t0)/dur,1),e=1-Math.pow(1-p,3),v=Math.round(e*val);
+  if(ne)ne.textContent=v+'%';if(be)be.style.width=v+'%';if(p<1)requestAnimationFrame(t);})(performance.now());
+}
+
+const sp=s=>s==='strong'?'<span class="pill pg">strong</span>':s==='weak'?'<span class="pill pr">weak</span>':'<span class="pill pa">review</span>';
+const pp=p=>(p.includes('Principal')||p.includes('Staff'))?`<span class="pill pg">${p}</span>`:(p.includes('Freelance')||p.includes('Boot'))?`<span class="pill pa">${p}</span>`:`<span style="color:#B7B7B7;font-size:11px">${p}</span>`;
+
+function buildATS(){
+  if(s2done)return;s2done=true;
+  const body=document.getElementById('atsbody');body.innerHTML='';
+  atsRows.forEach((c,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-weight:600">${c.name}</td><td>${c.role}</td><td><span class="pill pb">${c.stack}</span></td><td style="color:#B7B7B7;font-size:11px">${c.edu}</td><td style="text-align:center;font-weight:600">–</td><td style="text-align:center">${pp(c.prog)}</td><td style="text-align:center">${sp(c.sig)}</td>`;
+    body.appendChild(tr);
+    setTimeout(()=>{tr.classList.add('show');if(i===atsRows.length-1)setTimeout(()=>document.getElementById('b2').classList.add('show'),400);},50+i*55);
+  });
+}
+
+function buildS3(){
+  if(s3done)return;s3done=true;
+  setTimeout(()=>{
+    animScore('sc-real','bar-real',84,1100);
+    animScore('badge-real',null,84,1100);
+    setTimeout(()=>{animScore('sc-fake','bar-fake',94,1300);animScore('badge-fake',null,94,1300);},600);
+    setTimeout(()=>document.getElementById('confbanner').classList.add('show'),2400);
+    setTimeout(()=>{
+      const mb=document.getElementById('btn-main');
+      mb.style.display='inline-flex';mb.textContent='So what\'s the answer? →';
+    },3000);
+  },300);
+}
+
+function buildS4(){
+  const rows=[['kw1','sig1'],['kw2','sig2'],['kw3','sig3'],['kw4','sig4']];
+  rows.forEach(([l,r],i)=>{
+    setTimeout(()=>{
+      document.getElementById(l).classList.add('show');
+      document.getElementById(r).classList.add('show');
+    },i*400);
+  });
+  setTimeout(()=>{
+    document.getElementById('algo-scores').classList.add('show');
+    const mb=document.getElementById('btn-main');
+    mb.style.display='inline-flex';mb.textContent='Reveal scores';mb.disabled=false;
+    s4phase=1;
+  },4*400+300);
+}
+
+function revealScores(){
+  document.getElementById('topbar-logo').style.visibility='hidden';
+  const scoreLogo=document.getElementById('score-logo');
+  scoreLogo.style.display='flex';
+  const scores=document.getElementById('algo-scores');
+  scores.style.opacity='1';
+  scores.style.pointerEvents='auto';
+  setTimeout(()=>animScore('asc-bad','abar-bad',85,1100),300);
+  setTimeout(()=>animScore('asc-good','abar-good',91,1200),800);
+  setTimeout(()=>{
+    const mb=document.getElementById('btn-main');
+    mb.style.display='inline-flex';mb.textContent='And the conclusion →';mb.disabled=false;
+    s4phase=2;
+  },2400);
+}
+
+function showPayoff(){
+  document.getElementById('btn-main').style.display='none';
+  document.getElementById('btn-back').style.display='none';
+  document.getElementById('payoff').classList.add('show');
+}
+
+function setStage(n){
+  document.querySelectorAll('.stage').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s'+(n+1)).classList.add('active');
+  [0,1,2,3].forEach(i=>document.getElementById('d'+i).classList.toggle('on',i===n));
+  document.getElementById('topbar-logo').style.visibility = n===3 ? 'visible' : 'hidden';
+  document.getElementById('btn-back').style.display=n===0?'none':'inline-flex';
+  const mb=document.getElementById('btn-main');
+  if(n===0){mb.style.display='none';}
+  else if(stageBtns[n]){mb.style.display='inline-flex';mb.textContent=stageBtns[n];mb.disabled=false;}
+  else{mb.style.display='none';}
+  cur=n;s4phase=0;
+}
+
+document.getElementById('btn-drop-center').addEventListener('click',function(){
+  if(dropped)return;dropped=true;
+  document.getElementById('arena-cta').classList.add('hidden');
+  buildCards();
+  setTimeout(()=>{
+    cvCards.forEach(({el,ty},i)=>setTimeout(()=>{el.style.top=ty+'px';el.classList.add('show');},i*60));
+    setTimeout(()=>{
+      document.getElementById('cbar').classList.add('show');
+      animN('c1',30,900);animN('c2',360,1200,'+');animN('c3',12,800);
+      setTimeout(()=>{
+        const mb=document.getElementById('btn-main');
+        mb.style.display='inline-flex';mb.textContent=stageBtns[1];mb.disabled=false;
+      },1500);
+    },cvData.length*60+200);
+  },50);
+});
+
+document.getElementById('btn-main').addEventListener('click',()=>{
+  if(cur===0&&dropped){setStage(1);setTimeout(buildATS,300);}
+  else if(cur===1){setStage(2);setTimeout(buildS3,300);}
+  else if(cur===2){setStage(3);setTimeout(buildS4,400);}
+  else if(cur===3&&s4phase===1){revealScores();}
+  else if(cur===3&&s4phase===2){showPayoff();}
+});
+
+document.getElementById('btn-back').addEventListener('click',()=>{
+  document.getElementById('payoff').classList.remove('show');
+  document.getElementById('topbar-logo').style.visibility='visible';
+  if(cur>0)setStage(cur-1);
+});
+</script>
+</body>
+</html>
